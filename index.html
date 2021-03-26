@@ -1,0 +1,396 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health Management System</title>
+    <!-- <link rel="stylesheet" href="./public/style.css"> -->
+
+<style>
+        body {
+  background-color: #e6e7e9;
+  /* background-color: white; */
+}
+
+#login {
+  /* background-color: aquamarine; */
+  position: absolute;
+  left: 15%;
+  top: 35%;
+  height: 5em;
+  width: 15em;
+  padding: 10px;
+  font-size: 30px;
+  font-family: "Times New Roman", Times, serif;
+}
+
+#roll_no {
+  min-height: 2em;
+  margin-bottom: 5px;
+  outline: none;
+  width: 70%;
+  font-size: 20px;
+  border: none;
+  padding-left: 10px;
+}
+
+#design-tab {
+  position: absolute;
+  right: 10%;
+  bottom: 25%;
+}
+
+#design-tab-img {
+  height: 25em;
+  width: 25em;
+}
+
+#design-tab1{
+    position: absolute;
+  left: -3%;
+  bottom: 5%;
+}
+
+#design-tab-img1 {
+  height: 35em;
+  width: 45em;
+}
+
+
+#log-in-btn,
+#sign-in-btn {
+  padding: 10%;
+  position: absolute;
+  border: none;
+  font-size: 20px;
+  padding: 10px;
+  color: white;
+  background-color: rgb(0, 204, 255);
+  top: 50%;
+  outline: none;
+  transition: 0.4s;
+  cursor: pointer;
+}
+
+#log-in-btn:hover,
+#sign-in-btn:hover {
+  background-color: rgba(10, 194, 245, 0.733);
+}
+
+#log-in-btn {
+  left: 30%;
+}
+
+#sign-in-btn {
+  left: 60%;
+}
+
+#msg{
+    position: absolute;
+    width: 80%;
+    top: 75%;
+    left:10%;
+    font-style: italic;
+    color: red;
+    font-size: 25px;
+}
+
+#details{
+    /* display: inline-block; */
+    position: absolute;
+    top: 15%;
+    right: 8%;
+    background-color: rgb(255, 255, 255);
+    width: 40%;
+    min-height: 60%;
+    max-height: 80%;
+    padding-left:3%;
+    padding-top:1%;
+    padding-bottom:1%;
+    font-size: 20px;
+    overflow: auto;
+}
+
+.details-label{
+    text-transform: capitalize;
+    position: relative;
+    display: inline-block;
+    min-width: 8.5em;
+}
+
+.details-input{
+    padding-left: 1%;
+    outline: none;
+    border: 2px solid rgb(87, 87, 185);
+    font-size: 20px;
+    /* height:ma; */
+    /* margin-left: ; */
+}
+
+.details-elemt{
+    padding-bottom: 1%;
+}
+
+#apply{
+    position: absolute;
+    outline: none;
+    border: none;
+    background-color: rgb(73, 156, 189);
+    bottom: 3%;
+    left: 35%;
+    padding: 10px;
+    cursor: pointer;
+}
+
+#prescription{
+    cursor: pointer;
+    position: absolute;
+    outline: none;
+    border: none;
+    background-color: rgb(73, 156, 189);
+    bottom: 3%;
+    left: 35%;
+    padding: 10px;
+}
+
+#pres-area{
+    position: absolute;
+    top:10%;
+    right: 10%;
+}
+table{
+    border-collapse: collapse;
+}
+
+table td,
+table th {
+  border: 1px solid rgb(15, 15, 15);
+  padding: 2px;
+}
+
+table tbody tr:nth-child(even) {
+  background-color: #d9f3ff;
+}
+
+table tr:hover {
+  background-color: rgb(226, 225, 225);
+}
+
+table th {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  text-align: center;
+  background-color: #e6e8e9;
+  /* color: white; */
+}
+
+
+    </style>
+</head>
+<body id="body">
+    <script>
+
+var requestOptions = { method: "GET",};
+var isExist = false
+var json = {}
+var array = [];
+
+async function login() {
+  const roll_no = document.getElementById("roll_no");
+  const msg = document.getElementById("msg");
+  const details = document.getElementById("details");
+  const design_tab = document.getElementById("design-tab");
+  const design_tab1 = document.getElementById("design-tab1");
+  const login = document.getElementById("login");
+  const body = document.getElementById("body");
+  var temp = roll_no.value;
+  fetch("/get_id/" + temp, requestOptions)
+    .then((response) => response.text())
+    .then((result) => {
+        if(result== 'null') msg.innerText = "your roll no not registered yet,sign in to register";
+        else{
+            result = result.substring(1,result.length-1);
+            fetch("/get_details/"+result,requestOptions)
+            .then((response)=>response.text())
+            .then((result)=>{
+                isExist = true;
+                json = JSON.parse(result);
+                console.log(json);
+                document.getElementById("iname").value=json["name"];
+                document.getElementById("igender").value=json["gender"];
+                let keys = Object.keys(json);
+                
+
+
+                for(let i of keys){
+                    if(i=="_id" || i=="gender" || i=="name" || i=="pres"){}
+                    else createElementWithValue(details,i,json[i]);
+                }
+
+                details.appendChild(document.getElementById("prescription"));
+                document.getElementById("prescription").hidden = false;
+
+                login.hidden = true;
+                design_tab.hidden = true;                
+                design_tab1.hidden = false;                
+                details.hidden = false;
+                body.style.backgroundColor="white";
+                msg.innerText = result;
+            }).catch(error=>{
+                console.log(error);
+            });
+        }
+    })
+    .catch((error) => {
+    }); 
+}
+
+async function register(){
+  const roll_no = document.getElementById("roll_no");
+  const msg = document.getElementById("msg");
+  const details = document.getElementById("details");
+  const design_tab = document.getElementById("design-tab");
+  const design_tab1 = document.getElementById("design-tab1");
+  const login = document.getElementById("login");
+  const body = document.getElementById("body");
+    login.hidden = true;
+    design_tab.hidden = true;                
+    design_tab1.hidden = false;                
+    details.hidden = false;
+    body.style.backgroundColor="white";
+    document.getElementById("apply").hidden = false;
+    createElement(details,"age")
+    createElement(details,"current year")
+    createElement(details,"height")
+    createElement(details,"weight")
+    createElement(details,"temperature")
+    createElement(details,"blood group")
+    createElement(details,"specialized disease")
+    createElement(details,"allergy to")
+    array=["name","gender","age","current year","height","weight","temperature","blood group","specialized disease","allergy to"];
+    details.appendChild(document.getElementById("apply"))
+}
+
+async function Apply(){
+    let temp = {};
+    
+    for(let i of array){
+        temp[i] = document.getElementById("i"+i).value; 
+    }
+    console.log(temp);
+    fetch("/create_user/"+document.getElementById("roll_no").value+"/"+JSON.stringify(temp),requestOptions).then(response=>response.text()).then(result=>{
+        console.log(result);
+    })
+}
+
+async function createElement(details,name){
+    var element =document.createElement("div");
+    element.id = name;
+    element.className = "details-elemt";
+    element.innerHTML = '<label class="details-label" for="i'+name+'" id="l'+name+'">'+name+'</label><input class="details-input" type="text" id="i'+name+'">';
+    details.appendChild(element);
+}
+
+async function createElementWithValue(details,name,value){
+    var element =document.createElement("div");
+    element.id = name;
+    element.className = "details-elemt";
+    element.innerHTML = '<label class="details-label" for="i'+name+'" id="l'+name+'">'+name+'</label><input class="details-input" type="text" value="'+value+'" id="i'+name+'">';
+    details.appendChild(element);
+}
+
+async function getPres(){
+    document.getElementById("details").hidden = true;
+    let pres = document.getElementById("pres");
+    pres.hidden = false;
+    document.getElementById("pres-area").hidden=false
+    let data = json["prescription"];
+    let keys = Object.keys(data);
+    let optionHTML ="";
+        for(var i of keys){
+            optionHTML += '<option onclick="open("'+i+'")">'+i+'</option>'
+        }
+    let date = document.getElementById("dates");
+    
+    date.innerHTML = optionHTML;
+}
+
+async function open(date){
+    let data = json["prescription"][date];
+    let keys  = Object.keys(data);
+    let tableHTML = " <thead><tr><th>Medicine name</th><th>Count</th><th>Morning</th><th>Afternoon</th><th>Night</th></tr></thead><tbody>";
+    for(var i of keys){
+        tableHTML += "<tr><td>"+i+"</td><td>"+data[i]["count"]+"</td><td>"+data[i]["morning"]+"</td><td>"+data[i]["afternoon"]+"</td><td>"+data[i]["night"]+"</td></tr>"
+    }
+    tableHTML+="</tbody>"
+
+    var t= document.getElementById("table")
+    t.hidden = false;
+    t.innerHTML= tableHTML
+    }
+
+</script>
+    <div id="design-tab">
+        <img id="design-tab-img" src="/get_image" alt="" srcset="">
+    </div>
+
+    <div id="design-tab1" hidden>
+        <img id="design-tab-img1" src="/get_image1" alt="" srcset="">
+    </div>
+
+    <div id="login">
+        <label for="roll_no">Roll No</label>
+        <input type="text" name="RollNo" id="roll_no">
+        <br>
+        <input onclick="login()" type="button" class='go-btn' id="log-in-btn" value="log in">
+        <input onclick="register()" type="button" class='go-btn' id="sign-in-btn" value="sign in">
+        <p id='msg'></p>
+    </div>
+
+    <div id="details" hidden>
+        <div id="name" class="details-elemt">
+            <label class="details-label" for="iname" id="lname">Name</label>
+            <input class="details-input" type="text" id="iname">
+        </div>
+
+        <div id="gender" class="details-elemt">
+            <label class="details-label" for="igender" id="lgender">Gender</label>
+            <select class="details-input" id="igender">
+                <option value=""></option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+            </select>
+        </div>        
+    </div>
+
+    <div id="pres" hidden></div>
+    <div id="pres-area" hidden>
+        <select name="date" id="dates">
+        </select>
+        <table id="table"></table>
+        <table id="table-add" hidden>
+        <thead>
+            <tr>
+                <th>Medicine name</th>
+                <th>Count</th>
+                <th>Morning</th>
+                <th>Afternoon</th>
+                <th>Night</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><input type="text" name="name" id="med-name"></td>
+                <td><input type="number" name="count" id="med-count"></td>
+                <td><input type="checkbox" name="morning" checked></td>
+                <td><input type="checkbox" name="afternoon" checked></td>
+                <td><input type="checkbox" name="night" checked></td>
+            </tr>
+        </tbody>
+    </table>
+    
+</div>
+    <div onclick="Apply()" id="apply" hidden>Apply</div>
+    <div onclick="getPres()" id="prescription" hidden>Prescription</div>
+</body>
+</html>
